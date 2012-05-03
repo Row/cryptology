@@ -1,4 +1,5 @@
 import random
+import math
 # Schneier 1996, p. 224. (wikipedia)
 def modpow(b, e, m):
     result = 1
@@ -13,15 +14,23 @@ assert modpow(2,1,2) == 0, "Not equal"
 assert modpow(4,13,497) == 445, "Not equal"
 assert modpow(2,21701,2) == 0, "Not equal"
 
-def get_rand():
-    return random.randint(pow(2,32), pow(2,512))
+def get_odd_rand():
+    x = random.randint(pow(2,32), pow(2,512))
+    if not (x & 1):
+            x -= 1
+    return x
 
+def get_large_prime():
+    prime = get_odd_rand()
+    while(COMPOSITE == primality_test(prime, 100)):
+        prime = get_odd_rand()
 
+    return prime
 # Constants
 COMPOSITE = 0
 PROBABLY_PRIME = 1
     
-# Miller Rabin primality test
+# Miller Rabin primality test (wikipedia)
 # Input: n > 3, an odd integer to be tested for primality;
 # Input: k, a parameter that determines the accuracy of the test
 # Output: composite if n is composite, otherwise probably prime
@@ -48,16 +57,51 @@ def primality_test(n, k):
             return COMPOSITE
     return PROBABLY_PRIME
 
-print primality_test(7, 2) == PROBABLY_PRIME
-print primality_test(12, 2) == COMPOSITE
-print primality_test(pow(2,512) - 1, 2) == COMPOSITE
+assert primality_test(pow(2,512) - 1, 20) == COMPOSITE
 
-prime = 9
-while(COMPOSITE == primality_test(prime, 100)):
-    prime = random.randint(pow(2,32), pow(2,512))
-    if not (prime & 1):
-        prime -= 1
+# (wikipedia)
+def gcd(a, b):
+    while (b != 0):
+        t = b
+        b = a % b
+        a = t 
+    return a
 
-print prime
+def extended_gcd(a, b):
+    x = 0
+    y = 1
+    lastx = 1
+    lasty = 0
+    while (b != 0):
+        q = a / b
+        t = b
+        b = a % b
+        a = t
+        
+        t = lastx - q * x
+        lastx = x
+        x = t
+        
+        t = lasty - q * y
+        lasty = y
+        y = t        
+    return lasty
+        
+p = get_large_prime()
+q = get_large_prime()
+
+n = p * q
+phi_n = (p - 1) * (q - 1)
+
+# Public key
+e = random.randint(math.ceil(math.log(n, 2)), phi_n)
+while(gcd(e, phi_n) != 1):
+    e = random.randint(math.ceil(math.log(n, 2)), phi_n)
+
+# Private key
+d = extended_gcd(phi_n, e)
+
+print "Public key: ", e
+print "Private key: ", d 
 
 
