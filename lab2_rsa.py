@@ -28,7 +28,7 @@ PROBABLY_PRIME = 1
 def primality_test(n, k):
     s = 0
     d = n - 1
-    while(d & 1): 
+    while(d & 1):
         d = d >> 1
         s += 1
     for i in range(k):
@@ -52,10 +52,12 @@ print primality_test(7, 2) == PROBABLY_PRIME
 print primality_test(12, 2) == COMPOSITE
 print primality_test(pow(2,512) - 1, 2) == COMPOSITE
 
-prime = 4
-while(COMPOSITE != primality_test(prime, 10)):
-    print prime
-    prime = get_rand()
+prime = 9
+while(COMPOSITE == primality_test(prime, 100)):
+    prime = random.randint(pow(2,32), pow(2,512))
+    if not (prime & 1):
+        prime -= 1
 
 print prime
+
 
