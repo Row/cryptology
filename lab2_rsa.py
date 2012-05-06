@@ -86,22 +86,52 @@ def extended_gcd(a, b):
         lasty = y
         y = t        
     return lasty
-        
-p = get_large_prime()
-q = get_large_prime()
 
-n = p * q
-phi_n = (p - 1) * (q - 1)
+def mod_inverse(a, n):
+    i = n
+    v = 0
+    d = 1
+    while a > 0:
+        t = i/a
+        x = a
+        a = i % x
+        i = x
+        x = d
+        d = v - t*x
+        v = x
+    return v % n
+   
 
-# Public key
-e = random.randint(math.ceil(math.log(n, 2)), phi_n)
-while(gcd(e, phi_n) != 1):
+def generate_keys():
+    p = get_large_prime()
+    q = get_large_prime()
+
+    n = p * q
+    phi_n = (p - 1) * (q - 1)
+
+    # Public key
     e = random.randint(math.ceil(math.log(n, 2)), phi_n)
+    while(gcd(e, phi_n) != 1):
+        e = random.randint(math.ceil(math.log(n, 2)), phi_n)
 
-# Private key
-d = extended_gcd(phi_n, e)
+    # Private key
+    #d = extended_gcd(phi_n, e)
+    d = mod_inverse(e, phi_n)
 
-print "Public key: ", e
-print "Private key: ", d 
+    #print "Public key: ", e
+    #print "Private key: ", d
+    
+    return ((e, n), (d, n))
 
+# c = pow(m, e) mod n	
+def encrypt(msg, (e, n)):
+    return modpow(msg, e, n)
 
+# m = pow(c, d) mod n
+def decrypt(cipher, (d, n)):
+    return modpow(cipher, d, n)
+
+pub_key, priv_key = generate_keys()
+print "Public key:", pub_key
+print "Private key:", priv_key
+assert 67 == decrypt(encrypt(67, priv_key), pub_key), "Broken encryption/decryption"
