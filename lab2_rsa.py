@@ -60,6 +60,11 @@ def primality_test(n, k):
 assert primality_test(pow(2,512) - 1, 20) == COMPOSITE
 
 # (wikipedia)
+# 
+# Input: a, an integer that's larger that b
+# Input: b, an integer smaller than a
+# Output: The greatest Common divisor between a and b
+
 def gcd(a, b):
     while (b != 0):
         t = b
@@ -86,6 +91,11 @@ def extended_gcd(a, b):
         lasty = y
         y = t        
     return lasty
+
+# Find the inverse of a mod n
+# Input: a, an integer of which to find the inverse
+# of modulo n.
+# Input: n, the base 
 
 def mod_inverse(a, n):
     i = n
