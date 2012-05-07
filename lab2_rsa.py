@@ -143,6 +143,23 @@ def encrypt(string, (e, n)):
 def decrypt(cipher, (d, n)):
     return int_to_str(modpow(cipher, d, n)) 
 
+# encrypt with block length L
+def encrypt_block(string, L, priv_key):
+    ciphers = []
+    i = 0
+    while i < len(string):
+        j = i + L
+        ciphers.append(encrypt(string[i:j], priv_key))
+        i = j
+    return ciphers
+
+# decrypt the list ciphers with pub_key
+def decrypt_block(ciphers, pub_key):
+    string = ""
+    for i in ciphers:
+        string += decrypt(i, pub_key)
+    return string
+
 def str_to_int(string):
     str_int = 0
     for i in range(len(string)):
@@ -166,11 +183,15 @@ assert "A" == decrypt(encrypt("A", priv_key), pub_key), "Broken encryption/decry
 
 msg = "abc ABC abc, encrypt and decrypt this as an integer?"
 assert msg == int_to_str(str_to_int(msg)), "Not equal"
-
 cipher = encrypt(msg, priv_key)
 print "Cipher is: '%d'" % cipher
 msg1 = decrypt(cipher, pub_key)
 print "Plain is: '%s'" % msg1 
-
 assert msg == msg1, "Broken"
+
+# Test case using block 
+L = 2
+assert msg == decrypt_block(encrypt_block(msg, L, priv_key), pub_key), "Broken block"
+
+
 
