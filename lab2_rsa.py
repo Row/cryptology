@@ -133,9 +133,15 @@ def generate_keys():
     
     return ((e, n), (d, n))
 
-# c = pow(m, e) mod n	
-def crypt(string, (e, n)): 
-    return int_to_str(modpow(str_to_int(string), e, n))
+# string is the string to encrypt
+# returns the integer representation of the cipher	
+def encrypt(string, (e, n)): 
+    return modpow(str_to_int(string), e, n)
+
+# cipher as the integer
+# returns the decrypted string
+def decrypt(cipher, (d, n)):
+    return int_to_str(modpow(cipher, d, n)) 
 
 def str_to_int(string):
     str_int = 0
@@ -151,21 +157,20 @@ def int_to_str(int_str):
         int_str = int_str >> 8
     return string
 
-
 # Test Case
 # Generate keys 
 pub_key, priv_key = generate_keys()
 print "Public key:", pub_key
 print "Private key:", priv_key
-assert "A" == crypt(crypt("A", priv_key), pub_key), "Broken encryption/decryption"
+assert "A" == decrypt(encrypt("A", priv_key), pub_key), "Broken encryption/decryption"
 
 msg = "abc ABC abc, encrypt and decrypt this as an integer?"
 assert msg == int_to_str(str_to_int(msg)), "Not equal"
 
-cipher = crypt(msg, priv_key)
-print "Cipher is: ", cipher
-msg1 = crypt(cipher, pub_key)
-print "Plain is:", msg1 
+cipher = encrypt(msg, priv_key)
+print "Cipher is: '%d'" % cipher
+msg1 = decrypt(cipher, pub_key)
+print "Plain is: '%s'" % msg1 
 
 assert msg == msg1, "Broken"
 
