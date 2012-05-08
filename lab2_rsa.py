@@ -1,5 +1,7 @@
 import random
 import math
+import timeit
+
 # Schneier 1996, p. 224. (wikipedia)
 def modpow(b, e, m):
     result = 1
@@ -151,25 +153,35 @@ def int_to_str(int_str):
         string = chr(int_str & 255) + string
         int_str = int_str >> 8
     return string
+stats = 1
+debug = 0
 
-# Test Case
-# Generate keys 
-pub_key, priv_key = generate_keys(32, 512)
-print "Public key:", pub_key
-print "Private key:", priv_key
-assert "A" == decrypt(encrypt("A", priv_key), pub_key), "Broken encryption/decryption"
+if(stats):
+    for i in [32,64,128,256,511]:
+        cmd = "generate_keys(%d, %d)" % (i, (i + 1)) 
+        t = timeit.Timer(stmt=cmd,setup="from __main__ import generate_keys")
+        print 'TIMEIT:'
+        print cmd, (t.timeit(10) / 10)
 
-msg = "abc ABC abc, encrypt and decrypt this as an integer?"
-assert msg == int_to_str(str_to_int(msg)), "Not equal"
-cipher = encrypt(msg, priv_key)
-print "Cipher is: '%d'" % cipher
-msg1 = decrypt(cipher, pub_key)
-print "Plain is: '%s'" % msg1 
-assert msg == msg1, "Broken"
+if(debug):
+    # Test Case
+    # Generate keys 
+    pub_key, priv_key = generate_keys(32, 512)
+    print "Public key:", pub_key
+    print "Private key:", priv_key
+    assert "A" == decrypt(encrypt("A", priv_key), pub_key), "Broken encryption/decryption"
 
-# Test case using block 
-L = 2
-assert msg == decrypt_block(encrypt_block(msg, L, priv_key), pub_key), "Broken block"
+    msg = "abc ABC abc, encrypt and decrypt this as an integer?"
+    assert msg == int_to_str(str_to_int(msg)), "Not equal"
+    cipher = encrypt(msg, priv_key)
+    print "Cipher is: '%d'" % cipher
+    msg1 = decrypt(cipher, pub_key)
+    print "Plain is: '%s'" % msg1 
+    assert msg == msg1, "Broken"
+
+    # Test case using block 
+    L = 2
+    assert msg == decrypt_block(encrypt_block(msg, L, priv_key), pub_key), "Broken block"
 
 
 
