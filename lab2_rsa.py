@@ -1,6 +1,7 @@
 import random
 import math
 import timeit
+import pickle
 
 # Schneier 1996, p. 224. (wikipedia)
 def modpow(b, e, m):
@@ -11,10 +12,6 @@ def modpow(b, e, m):
         e = e >> 1
         b = (b * b) % m
     return result
-
-assert modpow(2,1,2) == 0, "Not equal"
-assert modpow(4,13,497) == 445, "Not equal"
-assert modpow(2,21701,2) == 0, "Not equal"
 
 def get_odd_rand(elower, eupper):
     x = random.randint(pow(2,elower), pow(2,eupper))
@@ -96,7 +93,9 @@ def mod_inverse(a, n):
 def generate_keys(elower, eupper):
     p = get_large_prime(elower, eupper)
     q = get_large_prime(elower, eupper)
+    return generate_keys_with_primes(p, q)
 
+def generate_keys_with_primes(p, q):
     n = p * q
     phi_n = (p - 1) * (q - 1)
 
@@ -153,17 +152,97 @@ def int_to_str(int_str):
         string = chr(int_str & 255) + string
         int_str = int_str >> 8
     return string
+
+def count_bits(inten):
+    c = 0
+    while inten > 0:
+        c += 1
+        inten = inten >> 1
+    return c
+
 stats = 1
 debug = 0
-
-if(stats):
-    for i in [32,64,128,256,511]:
+if(stats):   
+    pub_key, priv_key = generate_keys(32, 33)
+    d, n = priv_key 
+    e, n = pub_key
+    
+    # Length of L
+    time = [] 
+    length_of_l = [2,4,8,16,32,64,128]
+    string = "x" * 200
+    for i in length_of_l:
+        cmd = "encrypt_block('%s',%d,(%d, %d))" % (string, i, d, n) 
+        t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
+        time.append((t.timeit(10) / 10)) # average 
+    print "Length of L"
+    print time
+    print length_of_l
+    
+    # Length of input
+    time = [] 
+    bits = [2,4,8,16,32,64,128,256]
+    for i in bits:
+        string = "x" * i
+        cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, d, n) 
+        t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
+        time.append((t.timeit(10) / 10)) # average of 10
+    print "Encryption with length of text with block size 2"
+    print time
+    print bits
+    
+    # Length of input
+    time = [] 
+    bits = [2,4,8,16,32,64,128,256]
+    for i in bits:
+        string = "x" * i
+        ciphers = encrypt_block(string, 2, priv_key)
+        cmd = "decrypt_block(%s,(%d, %d))" % (ciphers, e, n) 
+        t = timeit.Timer(stmt=cmd,setup="from __main__ import decrypt_block")
+        time.append((t.timeit(10) / 10)) # average of 10
+    print "Length of text with of block size 2"
+    print time
+    print bits
+    """ 
+    # generate_keys the size (in number of bits) of p and q.    
+    time = [] 
+    bits = [32,64,128,256,511]
+    for i in bits:
         cmd = "generate_keys(%d, %d)" % (i, (i + 1)) 
         t = timeit.Timer(stmt=cmd,setup="from __main__ import generate_keys")
-        print 'TIMEIT:'
-        print cmd, (t.timeit(10) / 10)
+        time.append((t.timeit(10) / 10)) # average of 10
+    print time
+    print bits
+    """ 
 
+    # Length of d and e
+    time = [] 
+    bits_real = []
+    bits = [32,64,128,256,512]
+    for i in bits:
+        string = "xY" * 50
+        pub_key, priv_key = generate_keys(i, 128)
+        d, n = priv_key
+        e, n = pub_key
+        cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, d, n) 
+        t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
+        time.append((t.timeit(1) / 1)) # average of 10
+        bits_real.append((count_bits(d),count_bits(e)))
+        print bits_real
+    print "Size of d"
+    print time
+    print bits
+    print bits_real
+
+ 
+    
+    
+       
 if(debug):
+    assert modpow(2,1,2) == 0, "Not equal"
+    assert modpow(4,13,497) == 445, "Not equal"
+    assert modpow(2,21701,2) == 0, "Not equal"
+    
     # Test Case
     # Generate keys 
     pub_key, priv_key = generate_keys(32, 512)
