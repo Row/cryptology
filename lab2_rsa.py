@@ -159,6 +159,9 @@ def count_bits(inten):
         c += 1
         inten = inten >> 1
     return c
+#################################################################
+#### Here begind the statistical tests and program executions ###
+#################################################################
 
 stats = 1
 debug = 0
