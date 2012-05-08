@@ -14,18 +14,18 @@ assert modpow(2,1,2) == 0, "Not equal"
 assert modpow(4,13,497) == 445, "Not equal"
 assert modpow(2,21701,2) == 0, "Not equal"
 
-def get_odd_rand():
-    x = random.randint(pow(2,32), pow(2,512))
+def get_odd_rand(elower, eupper):
+    x = random.randint(pow(2,elower), pow(2,eupper))
     if not (x & 1):
             x -= 1
     return x
 
-def get_large_prime():
-    prime = get_odd_rand()
+def get_large_prime(elower, eupper):
+    prime = get_odd_rand(elower, eupper)
     while(COMPOSITE == primality_test(prime, 100)):
-        prime = get_odd_rand()
-
+        prime = get_odd_rand(elower, eupper)
     return prime
+    
 # Constants
 COMPOSITE = 0
 PROBABLY_PRIME = 1
@@ -42,7 +42,7 @@ def primality_test(n, k):
         s += 1
     for i in range(k):
         a = random.randint(2, n - 2)
-        x = modpow(a,d,n)
+        x = modpow(a, d, n)
         bo = 0
         if (x != 1 and x != n - 1):
             for r in range(1, s):
@@ -64,7 +64,6 @@ assert primality_test(pow(2,512) - 1, 20) == COMPOSITE
 # Input: a, an integer that's larger that b
 # Input: b, an integer smaller than a
 # Output: The greatest Common divisor between a and b
-
 def gcd(a, b):
     while (b != 0):
         t = b
@@ -72,60 +71,39 @@ def gcd(a, b):
         a = t 
     return a
 
-def extended_gcd(a, b):
-    x = 0
-    y = 1
-    lastx = 1
-    lasty = 0
-    while (b != 0):
-        q = a / b
-        t = b
-        b = a % b
-        a = t
-        
-        t = lastx - q * x
-        lastx = x
-        x = t
-        
-        t = lasty - q * y
-        lasty = y
-        y = t        
-    return lasty
-
 # Find the inverse of a mod n
 # Input: a, an integer of which to find the inverse
 # of modulo n.
 # Input: n, the base 
-
 def mod_inverse(a, n):
     i = n
     v = 0
     d = 1
     while a > 0:
-        t = i/a
+        t = i / a
         x = a
         a = i % x
         i = x
         x = d
-        d = v - t*x
+        d = v - t * x
         v = x
     return v % n
    
-
-def generate_keys():
-    p = get_large_prime()
-    q = get_large_prime()
+# Input elower and eupper are lower respective upper bit length of the primes
+# Ouput ((e, n), (d, n)) where (e, n) is the public key and (d, n) the private
+def generate_keys(elower, eupper):
+    p = get_large_prime(elower, eupper)
+    q = get_large_prime(elower, eupper)
 
     n = p * q
     phi_n = (p - 1) * (q - 1)
 
     # Public key
     e = random.randint(math.ceil(math.log(n, 2)), phi_n)
-    while(gcd(e, phi_n) != 1):
+    while (gcd(e, phi_n) != 1):
         e = random.randint(math.ceil(math.log(n, 2)), phi_n)
 
     # Private key
-    #d = extended_gcd(phi_n, e)
     d = mod_inverse(e, phi_n)
 
     #print "Public key: ", e
@@ -176,7 +154,7 @@ def int_to_str(int_str):
 
 # Test Case
 # Generate keys 
-pub_key, priv_key = generate_keys()
+pub_key, priv_key = generate_keys(32, 512)
 print "Public key:", pub_key
 print "Private key:", priv_key
 assert "A" == decrypt(encrypt("A", priv_key), pub_key), "Broken encryption/decryption"
