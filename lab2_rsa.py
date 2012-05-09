@@ -2,6 +2,7 @@ import random
 import math
 import timeit
 import pickle
+import sys
 
 # Schneier 1996, p. 224. (wikipedia)
 def modpow(b, e, m):
@@ -160,10 +161,10 @@ def count_bits(inten):
         inten = inten >> 1
     return c
 #################################################################
-#### Here begind the statistical tests and program executions ###
+#### Here begins the statistical tests and program executions ###
 #################################################################
 
-stats = 1
+stats = 0
 debug = 0
 if(stats):   
     pub_key, priv_key = generate_keys(32, 33)
@@ -265,5 +266,29 @@ if(debug):
     L = 2
     assert msg == decrypt_block(encrypt_block(msg, L, priv_key), pub_key), "Broken block"
 
-
-
+    
+    
+if(not stats):
+    # Parse input and read plaintext
+    L = int(sys.argv[1])
+    for i in range(2, len(sys.argv)):
+        input = open(sys.argv[i])
+        plaintext = (input.readline()).upper()
+        if plaintext[-1] == '\n':
+            plaintext = ciphertext[:-1]
+    print "Plaintext: '%s'" % plaintext
+    
+    # Generate keys
+    pub_key, priv_key = generate_keys(32, 512)
+    print "Public key:", pub_key
+    print "Private key:", priv_key
+    
+    # Encrypt plaintext
+    ciphertext = encrypt_block(plaintext, L, priv_key)
+    print "Ciphertext: ", ciphertext
+    
+    # Debug:
+    #plaintext_check = decrypt_block(ciphertext, pub_key)
+    #print "Decrypted ciphertext: '%s'" % plaintext_check
+    #print "L: ", L
+    
