@@ -271,30 +271,25 @@ if(not stats):
         input = open(sys.argv[i])
         plaintext = "".join(input.readlines())
     
-    print "Plaintext: ", plaintext
-    
-    FILE = open("rsa_group4_%s.plain" % L, "w")
-    FILE.write(plaintext)  
-    FILE.close
+    print "Input plaintext: ", plaintext
     
     # Generate keys
-    pub_key, priv_key = generate_keys(32, 33)
-    print "Public key: %s", pub_key
-    print "Private key: %s", priv_key
+    pub_key, priv_key = generate_keys(32, 512)
+    print "Public key: ", pub_key
+    print "Private key: ", priv_key
     
+    # Save public key to file
     e, n = pub_key
-    FILE = open("rsa_group4_%d.pub" % L,"w")
+    FILE = open("rsa_group4_%d.pub" % L, "w")
     FILE.write("%d\n%d" % (e, n))
     FILE.close()
     
-    
+    # Save private key to file
     d, n = priv_key
-    FILE = open("rsa_group4_%d.key" % L,"w")
+    FILE = open("rsa_group4_%d.key" % L, "w")
     FILE.write("%d\n%d" % (d, n))
     FILE.close()
-    # Write all the lines at once:
-    #FILE.writelines(namelist)
-    
+
     # Encrypt plaintext
     ciphertext = encrypt_block(plaintext, L, priv_key)
     print "Writing ciphertext file"
@@ -302,6 +297,13 @@ if(not stats):
     for i in ciphertext:
         FILE.write("%d\n" % i)
     FILE.close()
+    
+    decrypted_text = decrypt_block(ciphertext, pub_key)
+    
+    # Write plain text
+    FILE = open("rsa_group4_%s.plain" % L, "w")
+    FILE.write(decrypted_text)  
+    FILE.close
     
     # Debug:
     #plaintext_check = decrypt_block(ciphertext, pub_key)
