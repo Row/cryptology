@@ -159,6 +159,7 @@ def count_bits(inten):
         c += 1
         inten = inten >> 1
     return c
+
 #################################################################
 #### Here begins the statistical tests and program executions ###
 #################################################################
@@ -206,7 +207,7 @@ if(stats):
     print "Length of text with of block size 2"
     print time
     print bits
-    """ 
+    
     # generate_keys the size (in number of bits) of p and q.    
     time = [] 
     bits = [32,64,128,256,511]
@@ -216,8 +217,7 @@ if(stats):
         time.append((t.timeit(10) / 10)) # average of 10
     print time
     print bits
-    """ 
-
+    
     # Length of d and e
     time = [] 
     bits_real = []
@@ -229,8 +229,8 @@ if(stats):
         e, n = pub_key
         cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, d, n) 
         t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
-        time.append((t.timeit(1) / 1)) # average of 10
-        bits_real.append((count_bits(d),count_bits(e)))
+        time.append(t.timeit(1))
+        #bits_real.append((count_bits(d),count_bits(e)))
         print bits_real
     print "Size of d"
     print time
@@ -274,6 +274,7 @@ if(not stats):
     print "Input plaintext: ", plaintext
     
     # Generate keys
+    print "Generating keys"
     pub_key, priv_key = generate_keys(32, 512)
     print "Public key: ", pub_key
     print "Private key: ", priv_key
@@ -304,9 +305,4 @@ if(not stats):
     FILE = open("rsa_group4_%s.plain" % L, "w")
     FILE.write(decrypted_text)  
     FILE.close
-    
-    # Debug:
-    #plaintext_check = decrypt_block(ciphertext, pub_key)
-    #print "Decrypted ciphertext: '%s'" % plaintext_check
-    #print "L: ", L
     
