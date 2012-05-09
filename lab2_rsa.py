@@ -1,7 +1,6 @@
 import random
 import math
 import timeit
-import pickle
 import sys
 
 # Schneier 1996, p. 224. (wikipedia)
@@ -267,21 +266,42 @@ if(debug):
 if(not stats):
     # Parse input and read plaintext
     L = int(sys.argv[1])
+    plaintext = ""
     for i in range(2, len(sys.argv)):
         input = open(sys.argv[i])
-        plaintext = (input.readline()).upper()
-        if plaintext[-1] == '\n':
-            plaintext = ciphertext[:-1]
-    print "Plaintext: '%s'" % plaintext
+        plaintext = "".join(input.readlines())
+    
+    print "Plaintext: ", plaintext
+    
+    FILE = open("rsa_group4_%s.plain" % L, "w")
+    FILE.write(plaintext)  
+    FILE.close
     
     # Generate keys
-    pub_key, priv_key = generate_keys(32, 512)
-    print "Public key:", pub_key
-    print "Private key:", priv_key
+    pub_key, priv_key = generate_keys(32, 33)
+    print "Public key: %s", pub_key
+    print "Private key: %s", priv_key
+    
+    e, n = pub_key
+    FILE = open("rsa_group4_%d.pub" % L,"w")
+    FILE.write("%d\n%d" % (e, n))
+    FILE.close()
+    
+    
+    d, n = priv_key
+    FILE = open("rsa_group4_%d.key" % L,"w")
+    FILE.write("%d\n%d" % (d, n))
+    FILE.close()
+    # Write all the lines at once:
+    #FILE.writelines(namelist)
     
     # Encrypt plaintext
     ciphertext = encrypt_block(plaintext, L, priv_key)
-    print "Ciphertext: ", ciphertext
+    print "Writing ciphertext file"
+    FILE = open("rsa_group4_%d.crypto" % L,"w")
+    for i in ciphertext:
+        FILE.write("%d\n" % i)
+    FILE.close()
     
     # Debug:
     #plaintext_check = decrypt_block(ciphertext, pub_key)
