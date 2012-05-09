@@ -1,7 +1,6 @@
 import random
 import math
 import timeit
-import pickle
 
 # Schneier 1996, p. 224. (wikipedia)
 def modpow(b, e, m):
