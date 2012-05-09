@@ -235,17 +235,13 @@ if(stats):
     print time
     print bits
     print bits_real
-
- 
-    
-    
        
 if(debug):
+    # Test Case
     assert modpow(2,1,2) == 0, "Not equal"
     assert modpow(4,13,497) == 445, "Not equal"
     assert modpow(2,21701,2) == 0, "Not equal"
     
-    # Test Case
     # Generate keys 
     pub_key, priv_key = generate_keys(32, 512)
     print "Public key:", pub_key
