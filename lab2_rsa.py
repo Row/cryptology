@@ -165,7 +165,7 @@ def count_bits(inten):
 #################################################################
 
 stats = 0
-debug = 0
+debug = 1
 if(stats):   
     pub_key, priv_key = generate_keys(32, 33)
     d, n = priv_key 
@@ -242,24 +242,32 @@ if(debug):
     assert modpow(2,1,2) == 0, "Not equal"
     assert modpow(4,13,497) == 445, "Not equal"
     assert modpow(2,21701,2) == 0, "Not equal"
+    assert modpow(76,377,437) == pow(76,377,437), "Not equal"
+    assert modpow(76,377,437) == 228, "Not equal"
+
+    for i in range(1, 99999):
+        x = random.randint(1,1000)
+        y = random.randint(1,1000)
+        z = random.randint(1,1000)
+        assert modpow(x,y,z) == pow(x,y,z), "Not equal"
     
     # Generate keys 
     pub_key, priv_key = generate_keys(32, 512)
     print "Public key:", pub_key
     print "Private key:", priv_key
-    assert "A" == decrypt(encrypt("A", priv_key), pub_key), "Broken encryption/decryption"
+    assert "A" == decrypt(encrypt("A", pub_key), priv_key), "Broken encryption/decryption"
 
     msg = "abc ABC abc, encrypt and decrypt this as an integer?"
     assert msg == int_to_str(str_to_int(msg)), "Not equal"
-    cipher = encrypt(msg, priv_key)
+    cipher = encrypt(msg, pub_key)
     print "Cipher is: '%d'" % cipher
-    msg1 = decrypt(cipher, pub_key)
+    msg1 = decrypt(cipher, priv_key)
     print "Plain is: '%s'" % msg1 
     assert msg == msg1, "Broken"
 
     # Test case using block 
     L = 2
-    assert msg == decrypt_block(encrypt_block(msg, L, priv_key), pub_key), "Broken block"
+    assert msg == decrypt_block(encrypt_block(msg, L, pub_key), priv_key), "Broken block"
 
     
     
@@ -270,12 +278,13 @@ if(not stats):
     for i in range(2, len(sys.argv)):
         input = open(sys.argv[i])
         plaintext = "".join(input.readlines())
+        input.close()
     
     print "Input plaintext: ", plaintext
     
     # Generate keys
     print "Generating keys"
-    pub_key, priv_key = generate_keys(32, 512)
+    pub_key, priv_key = generate_keys(6, 256)
     print "Public key: ", pub_key
     print "Private key: ", priv_key
     
@@ -292,14 +301,14 @@ if(not stats):
     FILE.close()
 
     # Encrypt plaintext
-    ciphertext = encrypt_block(plaintext, L, priv_key)
+    ciphertext = encrypt_block(plaintext, L, pub_key)
     print "Writing ciphertext file"
     FILE = open("rsa_group4_%d.crypto" % L,"w")
     for i in ciphertext:
         FILE.write("%d\n" % i)
     FILE.close()
     
-    decrypted_text = decrypt_block(ciphertext, pub_key)
+    decrypted_text = decrypt_block(ciphertext, priv_key)
     
     # Write plain text
     FILE = open("rsa_group4_%s.plain" % L, "w")
