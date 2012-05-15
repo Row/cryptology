@@ -81,11 +81,25 @@ def count_bits(inten):
     return c
 
 def index(a, x):
-    i = bisect.bisect_left(a, x)
-    if i != len(a) and a[i] == x:
+    i = bisect.bisect_left(a, (x, -1))
+    if i != len(a) and a[i][0] == x:
         return i
     return -1
-
+"""    
+def binary_search(a, x, lo=0, hi=None):
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        (midval,crap) = a[mid]
+        if midval < x:
+            lo = mid+1
+        elif midval > x: 
+            hi = mid
+        else:
+            return mid
+    return -1
+"""
 #################################################################
 #### Here begins the statistical tests and program executions ###
 #################################################################
@@ -112,33 +126,36 @@ if(not debug):
     for i in ciphertexts:
         ciphertexts_int.append(int(i))
         
-    input = open(sys.argv[1])
+    input = open(sys.argv[2])
     e = int(input.readline())
     n = int(input.readline())
     input.close()
     
     c = ciphertexts_int[0]
     
+    print "Pub c '%d'" % c
     print "Pub e '%d'" % e
     print "Pub n '%d'" % n
     print "Int '%d'" % ciphertexts_int[0]
     #print "Ciphers '%s'" % "".join(ciphertexts)
     
-    r = 32
-    table = []
-    i = 1
-    foundindex = 0
-    while i <= pow(2,r):
-        v = modpow(i, e, n)
-        inv = mod_inverse(v, n)
-        bisect.insort(table,(v, i))
-        foundindex = index(table, c*inv % n)
-        if foundindex > -1:
-            break
-        i += 1
-    (oldv, j) = table[foundindex]
-    m = i*j 
-    for i in table:
-        print i
-    print "m = '%s'" % int_to_str(m)
+    plain = ""
+    for c in ciphertexts_int:
+        r = 32
+        table = []
+        i = 1
+        foundindex = 0
+        while i <= pow(2,r):
+            v = modpow(i, e, n)
+            inv = mod_inverse(v, n)
+            bisect.insort(table, (v, i))
+            foundindex = index(table, c*inv % n)
+            if foundindex > -1:
+                break
+            i += 1
+        (oldv, j) = table[foundindex]
+        m = i*j % n
+        plain += int_to_str(m)
+        print "m = '%s', i = %d" % (int_to_str(m), i)
+     print "Plain: '%s'" % plain
     

@@ -165,7 +165,7 @@ def count_bits(inten):
 #################################################################
 
 stats = 0
-debug = 1
+debug = 0
 if(stats):   
     pub_key, priv_key = generate_keys(32, 33)
     d, n = priv_key 
