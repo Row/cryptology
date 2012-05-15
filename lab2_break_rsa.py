@@ -130,7 +130,7 @@ if(not debug):
     e = int(input.readline())
     n = int(input.readline())
     input.close()
-    
+    r = int(sys.argv[3])  
     c = ciphertexts_int[0]
     
     print "Pub c '%d'" % c
@@ -141,7 +141,7 @@ if(not debug):
     
     plain = ""
     for c in ciphertexts_int:
-        r = 32
+       # r = 32
         table = []
         i = 1
         foundindex = 0
@@ -157,5 +157,5 @@ if(not debug):
         m = i*j % n
         plain += int_to_str(m)
         print "m = '%s', i = %d" % (int_to_str(m), i)
-     print "Plain: '%s'" % plain
+    print "Plain: '%s'" % plain
     
