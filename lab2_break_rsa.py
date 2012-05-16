@@ -85,21 +85,6 @@ def index(a, x):
     if i != len(a) and a[i][0] == x:
         return i
     return -1
-"""    
-def binary_search(a, x, lo=0, hi=None):
-    if hi is None:
-        hi = len(a)
-    while lo < hi:
-        mid = (lo+hi)//2
-        (midval,crap) = a[mid]
-        if midval < x:
-            lo = mid+1
-        elif midval > x: 
-            hi = mid
-        else:
-            return mid
-    return -1
-"""
 
 def create_table_and_inv(table, inv, e, n, start, end):
     for i in range(start, end+1):
@@ -112,6 +97,8 @@ def create_table_and_inv(table, inv, e, n, start, end):
         
 def match(ciphertexts_int, table, inv, n, r):
     plain = ""
+    L = -1
+    done = True
     for c in ciphertexts_int:
         i = 1
         while i <= pow(2,r):
@@ -121,13 +108,17 @@ def match(ciphertexts_int, table, inv, n, r):
             i += 1
         if foundindex > -1:
             (oldv, j) = table[foundindex]
-            m = i*j % n
-            plain += int_to_str(m)
+            m = int_to_str(i*j % n)
+            plain += m
+            L = len(m)
             # print "m = '%s', i = %d, j = %d" % (int_to_str(m), i, j)
         else:
             # print "m = ?, i = %d" % i
-            plain += "*"
-    return plain
+            done = False
+            plain += "[?]"
+    if L != -1:
+        plain = plain.replace("[?]", L * "*")        
+    return (done, plain)
     
 
 #################################################################
@@ -161,28 +152,20 @@ if(not debug):
     n = int(input.readline())
     input.close()
     r = int(sys.argv[3])  
-    #c = ciphertexts_int[0]
-    
-    #print "Pub c '%d'" % c
-    #print "Pub e '%d'" % e
-    #print "Pub n '%d'" % n
-    #print "Int '%d'" % ciphertexts_int[0]
-    #print "Ciphers '%s'" % "".join(ciphertexts)
-    
     
     table = []
     inv = []
     r_old = 0
     cont = "y"
-    while cont.lower() != "n":
+    done = False
+    while not done:
         if r_old == 0:
             print "Creating table [1, 2^%d]..." % r
             create_table_and_inv(table, inv, e, n, 1, pow(2,r))
         else:
             print "Creating table [2^%d+1, 2^%d]..." % (r_old, r)
             create_table_and_inv(table, inv, e, n, pow(2,r_old)+1, pow(2,r))
-        plain = match(ciphertexts_int, table, inv, n, r)
+        (done, plain) = match(ciphertexts_int, table, inv, n, r)
         print "Plaintext: '%s'" % plain
         r_old = r
         r += 1
-        cont = raw_input("Continue ([y]/n)? ")
