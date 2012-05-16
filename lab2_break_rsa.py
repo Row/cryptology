@@ -66,6 +66,9 @@ def str_to_int(string):
         str_int += ord(string[i])
     return str_int
 
+# Converts an integer to the string representation
+# based on ascii-values.
+
 def int_to_str(int_str):
     string = ""
     while(int_str > 0):
@@ -80,6 +83,8 @@ def count_bits(inten):
         inten = inten >> 1
     return c
 
+#Find the index of x in a if it exists,
+# else returns -1
 def index(a, x):
     i = bisect.bisect_left(a, (x, -1))
     if i != len(a) and a[i][0] == x:
@@ -137,7 +142,7 @@ if(debug):
 
         
 if(not debug):
-    # Parse input and read plaintext
+    # Parse input and read ciphertexts
     #r = int(sys.argv[1])
     ciphertexts = []
     input = open(sys.argv[1])
