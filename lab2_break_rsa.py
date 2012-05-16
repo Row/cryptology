@@ -124,40 +124,10 @@ def match(ciphertexts_int, table, inv, n, r):
     if L != -1:
         plain = plain.replace("[?]", L * "*")        
     return (done, plain)
-    
 
-#################################################################
-#### Here begins the statistical tests and program executions ###
-#################################################################
-
-debug = 0
-       
-if(debug):
-    # Test Case
-    assert modpow(2,1,2) == 0, "Not equal"
-    assert modpow(4,13,497) == 445, "Not equal"
-    assert modpow(2,21701,2) == 0, "Not equal"
-    assert modpow(76,377,437) == pow(76,377,437), "Not equal"
-    assert modpow(76,377,437) == 228, "Not equal"
-
-        
-if(not debug):
-    # Parse input and read ciphertexts
-    #r = int(sys.argv[1])
-    ciphertexts = []
-    input = open(sys.argv[1])
-    ciphertexts = input.readlines()
-    input.close()
-    ciphertexts_int = []
-    for i in ciphertexts:
-        ciphertexts_int.append(int(i))
-        
-    input = open(sys.argv[2])
-    e = int(input.readline())
-    n = int(input.readline())
-    input.close()
-    r = int(sys.argv[3])  
-    
+# 
+#
+def break_rsa(ciphertexts_int, e, n, r):
     table = []
     inv = []
     r_old = 0
@@ -174,3 +144,36 @@ if(not debug):
         print "Plaintext: '%s'" % plain
         r_old = r
         r += 1
+#################################################################
+#### Here begins the statistical tests and program executions ###
+#################################################################
+
+
+
+# Main        
+if(1):
+    # Parse input and read ciphertexts
+    ciphertexts = []
+    input = open(sys.argv[1])
+    ciphertexts = input.readlines()
+    input.close()
+    ciphertexts_int = []
+    for i in ciphertexts:
+        ciphertexts_int.append(int(i))
+        
+    input = open(sys.argv[2])
+    e = int(input.readline())
+    n = int(input.readline())
+    input.close()
+    r = int(sys.argv[3])
+    
+    # Stats
+    if(1):
+        # blabv    
+        average_of = 1
+        cmd = "break_rsa(%s, %d, %d, %d)" % (ciphertexts_int, e, n, r)
+        t = timeit.Timer(stmt=cmd,setup="from __main__ import break_rsa")
+        time = (t.timeit(average_of) / average_of)
+        print "Runtime: %fs" % time
+    else:
+        break_rsa(ciphertexts_int, e, n, r)    
