@@ -51,8 +51,6 @@ def index(a, x):
 # Appends the numbers from start to end to table and inv, using key (e, n) 
 def create_table_and_inv(table, inv, e, n, start, end):
     for i in range(start, end+1):
-        if i % 10000 == 0:
-            print i
         v = modpow(i, e, n)
         table.append((v, i))
         inv.append(mod_inverse(v, n))
