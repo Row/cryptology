@@ -1,4 +1,3 @@
-import random
 import math
 import timeit
 import sys
@@ -32,56 +31,14 @@ def mod_inverse(a, n):
         v = x
     return v % n
    
-# string is the string to encrypt
-# returns the integer representation of the cipher	
-def encrypt(string, (e, n)): 
-    return modpow(str_to_int(string), e, n)
-
-# cipher as the integer
-# returns the decrypted string
-def decrypt(cipher, (d, n)):
-    return int_to_str(modpow(cipher, d, n)) 
-
-# encrypt with block length L
-def encrypt_block(string, L, priv_key):
-    ciphers = []
-    i = 0
-    while i < len(string):
-        j = i + L
-        ciphers.append(encrypt(string[i:j], priv_key))
-        i = j
-    return ciphers
-
-# decrypt the list ciphers with pub_key
-def decrypt_block(ciphers, pub_key):
-    string = ""
-    for i in ciphers:
-        string += decrypt(i, pub_key)
-    return string
-
-def str_to_int(string):
-    str_int = 0
-    for i in range(len(string)):
-        str_int = str_int << 8
-        str_int += ord(string[i])
-    return str_int
-
 # Converts an integer to the string representation
 # based on ascii-values.
-
 def int_to_str(int_str):
     string = ""
     while(int_str > 0):
         string = chr(int_str & 255) + string
         int_str = int_str >> 8
     return string
-
-def count_bits(inten):
-    c = 0
-    while inten > 0:
-        c += 1
-        inten = inten >> 1
-    return c
 
 #Find the index of x in a if it exists,
 # else returns -1
@@ -91,6 +48,7 @@ def index(a, x):
         return i
     return -1
 
+# Appends the numbers from start to end to table and inv, using key (e, n) 
 def create_table_and_inv(table, inv, e, n, start, end):
     for i in range(start, end+1):
         if i % 10000 == 0:
@@ -99,7 +57,9 @@ def create_table_and_inv(table, inv, e, n, start, end):
         table.append((v, i))
         inv.append(mod_inverse(v, n))
     table.sort()
-        
+
+# Tries to match the ciphers in ciphertexts_int with the table and the list
+# inv, with key size n, 2^r times
 def match(ciphertexts_int, table, inv, n, r):
     plain = ""
     L = -1
@@ -116,17 +76,16 @@ def match(ciphertexts_int, table, inv, n, r):
             m = int_to_str(i*j % n)
             plain += m
             L = len(m)
-            # print "m = '%s', i = %d, j = %d" % (int_to_str(m), i, j)
         else:
-            # print "m = ?, i = %d" % i
             done = False
             plain += "[?]"
     if L != -1:
         plain = plain.replace("[?]", L * "*")        
     return (done, plain)
 
-# 
-#
+# ciphertexts_int is a list of block ciphers to break, public key (e, n) and 
+# initial table size r
+# Side-effects prints the progress and finally the result 
 def break_rsa(ciphertexts_int, e, n, r):
     table = []
     inv = []
@@ -148,32 +107,35 @@ def break_rsa(ciphertexts_int, e, n, r):
 #### Here begins the statistical tests and program executions ###
 #################################################################
 
-
-
 # Main        
-if(1):
-    # Parse input and read ciphertexts
-    ciphertexts = []
-    input = open(sys.argv[1])
-    ciphertexts = input.readlines()
-    input.close()
-    ciphertexts_int = []
-    for i in ciphertexts:
-        ciphertexts_int.append(int(i))
-        
-    input = open(sys.argv[2])
-    e = int(input.readline())
-    n = int(input.readline())
-    input.close()
-    r = int(sys.argv[3])
+# Parse input and read ciphertexts
+if len(sys.argv) < 4:
+    print "Usage:"
+    print "python lab2_break_rsa.py cipher.crypt key.pub r"
+    print "integer r specifies the first range of the table ([1, 2, ..., 2^r])"
+    sys.exit()
     
-    # Stats
-    if(1):
-        # blabv    
-        average_of = 1
-        cmd = "break_rsa(%s, %d, %d, %d)" % (ciphertexts_int, e, n, r)
-        t = timeit.Timer(stmt=cmd,setup="from __main__ import break_rsa")
-        time = (t.timeit(average_of) / average_of)
-        print "Runtime: %fs" % time
-    else:
-        break_rsa(ciphertexts_int, e, n, r)    
+ciphertexts = []
+input = open(sys.argv[1])
+ciphertexts = input.readlines()
+input.close()
+ciphertexts_int = []
+for i in ciphertexts:
+    ciphertexts_int.append(int(i))
+    
+input = open(sys.argv[2])
+e = int(input.readline())
+n = int(input.readline())
+input.close()
+r = int(sys.argv[3])
+
+# Stats
+if(1):
+    # blabv    
+    average_of = 1
+    cmd = "break_rsa(%s, %d, %d, %d)" % (ciphertexts_int, e, n, r)
+    t = timeit.Timer(stmt=cmd,setup="from __main__ import break_rsa")
+    time = (t.timeit(average_of) / average_of)
+    print "Runtime: %fs" % time
+else:
+    break_rsa(ciphertexts_int, e, n, r)    
