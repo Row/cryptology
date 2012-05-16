@@ -13,7 +13,7 @@ def modpow(b, e, m):
         b = (b * b) % m
     return result
 
-# Find the inverse of a mod n
+# Find the inverse of a mod n ( http://snippets.dzone.com/posts/show/4256 )
 # Input: a, an integer of which to find the inverse
 # of modulo n.
 # Input: n, the base 
