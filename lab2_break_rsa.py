@@ -100,6 +100,36 @@ def binary_search(a, x, lo=0, hi=None):
             return mid
     return -1
 """
+
+def create_table_and_inv(table, inv, e, n, start, end):
+    for i in range(start, end+1):
+        if i % 10000 == 0:
+            print i
+        v = modpow(i, e, n)
+        table.append((v, i))
+        inv.append(mod_inverse(v, n))
+    table.sort()
+        
+def match(ciphertexts_int, table, inv, n, r):
+    plain = ""
+    for c in ciphertexts_int:
+        i = 1
+        while i <= pow(2,r):
+            foundindex = index(table, c*inv[i-1] % n)
+            if foundindex > -1:
+                break
+            i += 1
+        if foundindex > -1:
+            (oldv, j) = table[foundindex]
+            m = i*j % n
+            plain += int_to_str(m)
+            # print "m = '%s', i = %d, j = %d" % (int_to_str(m), i, j)
+        else:
+            # print "m = ?, i = %d" % i
+            plain += "*"
+    return plain
+    
+
 #################################################################
 #### Here begins the statistical tests and program executions ###
 #################################################################
@@ -131,31 +161,28 @@ if(not debug):
     n = int(input.readline())
     input.close()
     r = int(sys.argv[3])  
-    c = ciphertexts_int[0]
+    #c = ciphertexts_int[0]
     
-    print "Pub c '%d'" % c
-    print "Pub e '%d'" % e
-    print "Pub n '%d'" % n
-    print "Int '%d'" % ciphertexts_int[0]
+    #print "Pub c '%d'" % c
+    #print "Pub e '%d'" % e
+    #print "Pub n '%d'" % n
+    #print "Int '%d'" % ciphertexts_int[0]
     #print "Ciphers '%s'" % "".join(ciphertexts)
     
-    plain = ""
-    for c in ciphertexts_int:
-       # r = 32
-        table = []
-        i = 1
-        foundindex = 0
-        while i <= pow(2,r):
-            v = modpow(i, e, n)
-            inv = mod_inverse(v, n)
-            bisect.insort(table, (v, i))
-            foundindex = index(table, c*inv % n)
-            if foundindex > -1:
-                break
-            i += 1
-        (oldv, j) = table[foundindex]
-        m = i*j % n
-        plain += int_to_str(m)
-        print "m = '%s', i = %d" % (int_to_str(m), i)
-    print "Plain: '%s'" % plain
     
+    table = []
+    inv = []
+    r_old = 0
+    cont = "y"
+    while cont.lower() != "n":
+        if r_old == 0:
+            print "Creating table [1, 2^%d]..." % r
+            create_table_and_inv(table, inv, e, n, 1, pow(2,r))
+        else:
+            print "Creating table [2^%d+1, 2^%d]..." % (r_old, r)
+            create_table_and_inv(table, inv, e, n, pow(2,r_old)+1, pow(2,r))
+        plain = match(ciphertexts_int, table, inv, n, r)
+        print "Plaintext: '%s'" % plain
+        r_old = r
+        r += 1
+        cont = raw_input("Continue ([y]/n)? ")
