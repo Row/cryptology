@@ -1,3 +1,4 @@
+import random
 import math
 import timeit
 import sys
@@ -101,6 +102,15 @@ def break_rsa(ciphertexts_int, e, n, r):
         print "Plaintext: '%s'" % plain
         r_old = r
         r += 1
+
+# Brute-force crack the crypto number c by trying all messages in list
+# message
+def brute_force(message, e, n, c):
+    for m in message:
+        if modpow(m, e, n) == c:
+            print "Found it! m = ", m
+
+        
 #################################################################
 #### Here begins the statistical tests and program executions ###
 #################################################################
@@ -129,11 +139,27 @@ r = int(sys.argv[3])
 
 # Stats
 if(1):
-    # blabv    
+    # Runtime
     average_of = 1
     cmd = "break_rsa(%s, %d, %d, %d)" % (ciphertexts_int, e, n, r)
     t = timeit.Timer(stmt=cmd,setup="from __main__ import break_rsa")
     time = (t.timeit(average_of) / average_of)
     print "Runtime: %fs" % time
+    
+    # Brute-force estimate
+    average_of = 1
+    nr_of_messages = 1000
+    message = []
+    for i in range(0,nr_of_messages):
+        message.append(random.randint(0,n-1))
+    c = random.randint(0,n-1)
+    cmd = "brute_force(%s, %d, %d, %d)" % (message, e, n, c)
+    t = timeit.Timer(stmt=cmd,setup="from __main__ import brute_force")
+    time = (t.timeit(average_of) / average_of)
+    seconds_per_year = 3600*24*365.25
+    expected_time = (n/(2*nr_of_messages*seconds_per_year))*time
+    print "Brute-force testing %d messages took %fs " % (nr_of_messages, time)
+    print "Expected time to find the first message: %f years" % expected_time
+    
 else:
     break_rsa(ciphertexts_int, e, n, r)    
