@@ -138,7 +138,7 @@ input.close()
 r = int(sys.argv[3])
 
 # Stats
-if(1):
+if(0):
     # Runtime
     average_of = 1
     cmd = "break_rsa(%s, %d, %d, %d)" % (ciphertexts_int, e, n, r)

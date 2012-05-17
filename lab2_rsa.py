@@ -123,20 +123,20 @@ def decrypt(cipher, (d, n)):
     return int_to_str(modpow(cipher, d, n)) 
 
 # encrypt with block length L
-def encrypt_block(string, L, priv_key):
+def encrypt_block(string, L, pub_key):
     ciphers = []
     i = 0
     while i < len(string):
         j = i + L
-        ciphers.append(encrypt(string[i:j], priv_key))
+        ciphers.append(encrypt(string[i:j], pub_key))
         i = j
     return ciphers
 
-# decrypt the list ciphers with pub_key
-def decrypt_block(ciphers, pub_key):
+# decrypt the list ciphers with priv_key
+def decrypt_block(ciphers, priv_key):
     string = ""
     for i in ciphers:
-        string += decrypt(i, pub_key)
+        string += decrypt(i, priv_key)
     return string
 
 def str_to_int(string):
@@ -176,7 +176,7 @@ if(stats):
     length_of_l = [2,4,8,16,32,64,128]
     string = "x" * 200
     for i in length_of_l:
-        cmd = "encrypt_block('%s',%d,(%d, %d))" % (string, i, d, n) 
+        cmd = "encrypt_block('%s',%d,(%d, %d))" % (string, i, e, n) 
         t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
         time.append((t.timeit(10) / 10)) # average 
     print "Length of L"
@@ -188,7 +188,7 @@ if(stats):
     bits = [2,4,8,16,32,64,128,256]
     for i in bits:
         string = "x" * i
-        cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, d, n) 
+        cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, e, n) 
         t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
         time.append((t.timeit(10) / 10)) # average of 10
     print "Encryption with length of text with block size 2"
@@ -200,8 +200,8 @@ if(stats):
     bits = [2,4,8,16,32,64,128,256]
     for i in bits:
         string = "x" * i
-        ciphers = encrypt_block(string, 2, priv_key)
-        cmd = "decrypt_block(%s,(%d, %d))" % (ciphers, e, n) 
+        ciphers = encrypt_block(string, 2, pub_key)
+        cmd = "decrypt_block(%s,(%d, %d))" % (ciphers, d, n) 
         t = timeit.Timer(stmt=cmd,setup="from __main__ import decrypt_block")
         time.append((t.timeit(10) / 10)) # average of 10
     print "Length of text with of block size 2"
@@ -227,12 +227,12 @@ if(stats):
         pub_key, priv_key = generate_keys(i, 128)
         d, n = priv_key
         e, n = pub_key
-        cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, d, n) 
+        cmd = "encrypt_block('%s', 2, (%d, %d))" % (string, e, n) 
         t = timeit.Timer(stmt=cmd,setup="from __main__ import encrypt_block")
         time.append(t.timeit(1))
         #bits_real.append((count_bits(d),count_bits(e)))
         print bits_real
-    print "Size of d"
+    print "Size of e"
     print time
     print bits
     print bits_real
@@ -313,5 +313,4 @@ if(not stats):
     # Write plain text
     FILE = open("rsa_group4_%s.plain" % L, "w")
     FILE.write(decrypted_text)  
-    FILE.close
-    
+    FILE.close()
